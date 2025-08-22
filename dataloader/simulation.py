@@ -29,7 +29,7 @@ def sensor_location():
     sensor_pos = []
     channels = ['NO2', 'O3', 'PM10', 'PM25']
     for c in channels:
-        with open("air_paris/new_observation_data/station_data_"+c+ ".pkl", "rb") as f:
+        with open("data/new_observation_data/station_data_"+c+ ".pkl", "rb") as f:
             station_data_dict = pickle.load(f)
         coords = []
 
@@ -54,6 +54,26 @@ def data_stat():
 
     return dict_minmax, dict_meanstd
 
+def create_dataset(normalisation, train_idx):
+    '''
+    normalisation: True if gaussian norm applied, False if min-max norm applied
+
+    returns: Torch Dataset
+    '''
+    all_polair = load_data()
+    sensor_pos = sensor_location()
+    dict_minmax, dict_meanstd = data_stat()
+
+    if normalisation:
+        train_dataset_polair = AirPollutionDataset(all_polair[:train_idx], mean_std_data=dict_meanstd, dict_min_max=None, sensor_pos=sensor_pos, vt=True, random_mask=False)
+        val_dataset_polair = AirPollutionDataset(all_polair[train_idx:], mean_std_data=dict_meanstd, dict_min_max=None, sensor_pos=sensor_pos, vt=True, random_mask=False)
+    else:
+        train_dataset_polair = AirPollutionDataset(all_polair[:train_idx], mean_std_data=None, dict_min_max=dict_minmax, sensor_pos=sensor_pos, vt=True, random_mask=False)
+        val_dataset_polair = AirPollutionDataset(all_polair[train_idx:], mean_std_data=None, dict_min_max=dict_minmax, sensor_pos=sensor_pos, vt=True, random_mask=False)
+    
+    return train_dataset_polair, val_dataset_polair
+#
+#
 
 class AirPollutionDataset(Dataset):
     def __init__(self, data, mean_std_data, dict_min_max, sensor_pos=None, random_mask=False, mask_ratio=0.9, vt=True):
@@ -155,23 +175,3 @@ class AirPollutionDataset(Dataset):
             vt = None
 
         return img, mask, vt
-    
-
-def load_data(normalisation, train_idx):
-    '''
-    normalisation: True if gaussian norm applied, False if min-max norm applied
-
-    returns: Torch Dataset
-    '''
-    all_polair = load_data()
-    sensor_pos = sensor_location()
-    dict_minmax, dict_meanstd = data_stat()
-
-    if normalisation:
-        train_dataset_polair = AirPollutionDataset(all_polair[:train_idx], mean_std_data=dict_meanstd, dict_min_max=None, sensor_pos=sensor_pos, vt=True, random_mask=False)
-        val_dataset_polair = AirPollutionDataset(all_polair[train_idx:], mean_std_data=dict_meanstd, dict_min_max=None, sensor_pos=sensor_pos, vt=True, random_mask=False)
-    else:
-        train_dataset_polair = AirPollutionDataset(all_polair[:train_idx], mean_std_data=None, dict_min_max=dict_minmax, sensor_pos=sensor_pos, vt=True, random_mask=False)
-        val_dataset_polair = AirPollutionDataset(all_polair[train_idx:], mean_std_data=None, dict_min_max=dict_minmax, sensor_pos=sensor_pos, vt=True, random_mask=False)
-    
-    return train_dataset_polair, val_dataset_polair

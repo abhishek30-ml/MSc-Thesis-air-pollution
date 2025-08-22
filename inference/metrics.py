@@ -104,6 +104,7 @@ class RelativeErrorObs():
         f.suptitle(type + ' Relative Error Histogram')
         f.tight_layout()
         plt.savefig('result/observation_data/relative_error/rel_err_' + type + '_channel.svg')
+        plt.close()
 
 
     def create_mean_plot(self, all_relative_error, type):
@@ -117,6 +118,7 @@ class RelativeErrorObs():
         plt.title(type + ' Relative Error Histogram (Real Data)')
         plt.xlim(0,6)
         plt.savefig('result/observation_data/relative_error/rel_err_' + type + '.svg')
+        plt.close()
 
     
     def calculate_error(self, model, model_type, dataloader=None):
@@ -149,12 +151,15 @@ class RelativeErrorObs():
 
         for k in range(4):
             chan_rel_err[k] = (torch.cat(chan_rel_err[k])).numpy()
-        chan_rel_err = {str(k): v for k, v in chan_rel_err.items()}
 
-        self.save_numpy(chan_rel_err, all_rel_err, model_type)
+        # Save plots
         self.create_channel_plot(chan_rel_err, model_type)
         self.create_mean_plot(all_rel_err, model_type)
 
+        # Save numpy files
+        chan_rel_err = {str(k): v for k, v in chan_rel_err.items()}
+        self.save_numpy(chan_rel_err, all_rel_err, model_type)
+        
 ####
 
 class EvaluationMetricsSim():
@@ -190,12 +195,12 @@ class EvaluationMetricsSim():
             max_pixel = torch.Tensor([self.dict_minmax[0][1], self.dict_minmax[1][1], self.dict_minmax[2][1], self.dict_minmax[3][1]])
             max_pixel = max_pixel.unsqueeze(0)
 
-            for org_img, masked_img in dataloader:
+            for org_img, _, vt in dataloader:
 
                 org_img = org_img.to(device)
-                masked_img = masked_img.to(device)
+                vt = vt.to(device)
 
-                predicted_img = model.call_model(masked_img)
+                predicted_img = model.call_model(vt)
 
                 for k in range(4):
                     data_min = self.dict_minmax [k][0]
@@ -221,7 +226,7 @@ class EvaluationMetricsSim():
         
         relative_error = torch.cat(relative_error, dim=0)
 
-        savepath = self.save_metrics(relative_error, ssim_meas, model_type)
+        savepath = self.save_metrics(relative_error.cpu(), ssim_meas, model_type)
         return savepath
 
 
@@ -305,8 +310,8 @@ class DiffusionEvaluation():
                 json.dump(data, f, indent=4)
 
         last_rel_error = torch.cat(last_rel_error, dim=0)
-        savepath = 'result/simulation_data/relative_error/numpy_files/relative_error.npy'
-        np.save('result/simulation_data/relative_error/numpy_files/relative_error.npy', last_rel_error.cpu())
+        savepath = 'result/simulation_data/relative_error/numpy_files/relative_error_diffusion.npy'
+        np.save(savepath, last_rel_error.cpu())
 
         return savepath
         

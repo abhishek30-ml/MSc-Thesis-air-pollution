@@ -42,7 +42,7 @@ def obs_data_loc():
     sensor_pos = []
     channels = ['NO2', 'O3', 'PM10', 'PM25']
     for c in channels:
-        with open("air_paris/new_observation_data/station_data_"+c+ ".pkl", "rb") as f:
+        with open("data/new_observation_data/station_data_"+c+ ".pkl", "rb") as f:
             station_data_dict = pickle.load(f)
         coords = []
 
