@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from utils.patches import patchify
 from framework.models import Unet2D
-from dataloader.simulation import load_data
+from dataloader.simulation import create_dataset
 
 class Baseline_Model_Unet():
     def __init__(self, img_size, config=None, lrate=0.001, weight_decay=0, eta_min=0.0001, t_max=100, lr_schedule=True, load_checkpoint=False, device='cuda'):
@@ -229,13 +229,15 @@ def train_model(load_checkpoint):
     device = config['device']
     epochs = config['epochs']
 
-    train_dataset_polair, val_dataset_polair = load_data(normalisation=False, train_idx=train_idx)
+    train_dataset_polair, val_dataset_polair = create_dataset(normalisation=False, train_idx=train_idx)
     train_dataloader = DataLoader(train_dataset_polair, batch_size=batch_size, shuffle=True)
     val_dataloader = DataLoader(val_dataset_polair, batch_size=8, shuffle=False)
+    print('Dataset loading complete')
 
     img,_,_ = next(iter(val_dataloader))
     img_size = img[0][0].shape
 
     base_model = load_model(img_size, load_checkpoint)
     
+    print('Training start')
     train_loss, val_loss, chann_train_loss, chann_val_loss = base_model._train_model(train_dataloader, val_dataloader, num_epochs=epochs, device=device)

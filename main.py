@@ -19,8 +19,10 @@ def run(model, load_cp):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='diffusion', type=str)
-    parser.add_argument('--load_checkpoint', default=True, type=bool)
+    parser.add_argument('--model', default='diffusion', type=str,
+                        help="Choose the model type")
+    parser.add_argument('--load_checkpoint', action='store_true',
+                        help="Use this flag to load a checkpoint")
 
     return parser.parse_args()
 

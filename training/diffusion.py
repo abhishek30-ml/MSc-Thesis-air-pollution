@@ -8,7 +8,7 @@ from diffusers.utils.torch_utils import randn_tensor
 
 
 from framework.models import Unet2DCondition, ConditionEncoder
-from dataloader.simulation import load_data
+from dataloader.simulation import create_dataset
 from utils.noise_scheduler import Karras_sigmas_lognormal
 
 class Cond_Diffusion_Model():
@@ -369,9 +369,10 @@ def train_model(load_checkpoint):
     device = config['device']
     epochs = config['epochs']
 
-    train_dataset_polair, val_dataset_polair = load_data(normalisation=True, train_idx=train_idx)
+    train_dataset_polair, val_dataset_polair = create_dataset(normalisation=True, train_idx=train_idx)
     train_dataloader = DataLoader(train_dataset_polair, batch_size=batch_size, shuffle=True)
     val_dataloader = DataLoader(val_dataset_polair, batch_size=8, shuffle=False)
+    print('Dataset loading complete')
 
     noise_config = config['noise_scheduler']
 
@@ -387,5 +388,6 @@ def train_model(load_checkpoint):
     noise_scheduler = scheduler(algorithm_type='sde-dpmsolver++')
     noise_sampler = Karras_sigmas_lognormal(noise_scheduler.sigmas, P_mean=P_mean, P_std=P_std)  #1.2, 1.7
 
+    print('Training start')
     train_loss, val_loss = base_model.train_model(train_dataloader, val_dataloader, noise_sampler, noise_scheduler, num_epochs=epochs, device=device)
 
