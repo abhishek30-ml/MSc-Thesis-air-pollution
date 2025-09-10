@@ -93,7 +93,7 @@ class RelativeErrorObs():
         for i in range(2):
             for j in range(2):
 
-                ax[i,j].hist(chan_rel_err[k], bins=500, color='blue', alpha=0.5, label='max: '+ str(chan_rel_err[k].max()))
+                ax[i,j].hist(chan_rel_err[k], bins=500, color='blue', alpha=0.5, label='max: '+ str(chan_rel_err[k].max()), density=True)
                 ax[i,j].axvline(chan_rel_err[k].mean(), color='blue', linestyle='--', linewidth=2, label='mean: ' + str(chan_rel_err[k].mean()))
                 ax[i,j].axvline(np.median(chan_rel_err[k]), color='green', linestyle='--', linewidth=2, label='median: ' + str(np.median(chan_rel_err[k])))
                 ax[i,j].legend()
@@ -101,7 +101,6 @@ class RelativeErrorObs():
                 ax[i,j].set_title('(Real Data): '+ title[k])
                 ax[i,j].set_xlim(0,3)
                 k=k+1
-        f.suptitle(type + ' Relative Error Histogram')
         f.tight_layout()
         plt.savefig('result/observation_data/relative_error/rel_err_' + type + '_channel.svg')
         plt.close()
@@ -110,7 +109,7 @@ class RelativeErrorObs():
     def create_mean_plot(self, all_relative_error, type):
         # Creates histogram plot for mean relative error
 
-        plt.hist(all_relative_error, bins=500, color='blue', alpha=0.5, label='max: '+ str(all_relative_error.max()))
+        plt.hist(all_relative_error, bins=500, color='blue', alpha=0.5, label='max: '+ str(all_relative_error.max()), density=True)
         plt.axvline(all_relative_error.mean(), color='blue', linestyle='--', linewidth=2, label='mean: ' + str(all_relative_error.mean()))
         plt.axvline(np.median(all_relative_error), color='green', linestyle='--', linewidth=2, label='median: ' + str(np.median(all_relative_error)))
         plt.legend()
